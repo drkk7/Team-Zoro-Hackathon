@@ -1,0 +1,238 @@
+<!-- Notification Widget Component -->
+<div class="notification-widget">
+    <div class="notification-header">
+        <h6 class="mb-0">
+            <i class="fas fa-bell me-2"></i>Notifications
+            <span class="badge bg-danger ms-2" id="notification-count">{{ notifications|length }}</span>
+        </h6>
+        <button class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
+            <i class="fas fa-check-double"></i> Mark All Read
+        </button>
+    </div>
+    
+    <div class="notification-list" id="notification-list">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification-item {% if notification.priority == 'urgent' %}urgent{% elif notification.priority == 'high' %}high{% endif %}" 
+                 data-notification-id="{{ notification.id }}">
+                <div class="notification-content">
+                    <div class="notification-title">
+                        <i class="fas fa-{% if notification.notification_type == 'assignment' %}tasks{% elif notification.notification_type == 'deadline' %}clock{% elif notification.notification_type == 'quiz' %}question-circle{% else %}info-circle{% endif %} me-2"></i>
+                        {{ notification.title }}
+                    </div>
+                    <div class="notification-message">{{ notification.message }}</div>
+                    <div class="notification-time">
+                        <small class="text-muted">{{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn btn-sm btn-outline-primary" onclick="markAsRead({{ notification.id }})">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p class="mb-0">No new notifications</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="notification-footer">
+        <a href="{% if current_user.role == 1 %}{{ url_for('notifications.user_assignments', user_id=current_user.id) }}{% else %}{{ url_for('notifications.teacher_assignments', teacher_id=current_user.id) }}{% endif %}" 
+           class="btn btn-sm btn-primary w-100">
+            <i class="fas fa-eye me-1"></i>View All Assignments
+        </a>
+    </div>
+</div>
+
+<style>
+.notification-widget {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-height: 400px;
+    overflow: hidden;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.notification-header h6 {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.notification-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border-left: 3px solid #00d4ff;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    background: rgba(0, 212, 255, 0.1);
+    transform: translateX(3px);
+}
+
+.notification-item.urgent {
+    border-left-color: #ff4757;
+    background: rgba(255, 71, 87, 0.1);
+}
+
+.notification-item.high {
+    border-left-color: #ffa502;
+    background: rgba(255, 165, 2, 0.1);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    color: #cccccc;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+
+.notification-time {
+    font-size: 0.7rem;
+}
+
+.notification-actions {
+    margin-left: 0.5rem;
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 2rem;
+    color: #cccccc;
+}
+
+.no-notifications i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+.notification-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+}
+
+/* Scrollbar styling */
+.notification-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.5);
+    border-radius: 2px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.7);
+}
+</style>
+
+<script>
+function markAsRead(notificationId) {
+    fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove notification from UI
+            const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (notificationElement) {
+                notificationElement.style.opacity = '0.5';
+                notificationElement.style.transform = 'translateX(-10px)';
+                setTimeout(() => {
+                    notificationElement.remove();
+                    updateNotificationCount();
+                }, 300);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+    });
+}
+
+function markAllAsRead() {
+    const notifications = document.querySelectorAll('.notification-item');
+    notifications.forEach(notification => {
+        const notificationId = notification.getAttribute('data-notification-id');
+        if (notificationId) {
+            markAsRead(notificationId);
+        }
+    });
+}
+
+function updateNotificationCount() {
+    const count = document.querySelectorAll('.notification-item').length;
+    const countElement = document.getElementById('notification-count');
+    if (countElement) {
+        countElement.textContent = count;
+        if (count === 0) {
+            countElement.style.display = 'none';
+        }
+    }
+}
+
+// Auto-refresh notifications every 30 seconds
+setInterval(() => {
+    fetch(`/api/notifications/{{ current_user.id }}`)
+        .then(response => response.json())
+        .then(notifications => {
+            // Update notification count
+            const countElement = document.getElementById('notification-count');
+            if (countElement) {
+                countElement.textContent = notifications.length;
+                countElement.style.display = notifications.length > 0 ? 'inline' : 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching notifications:', error);
+        });
+}, 30000);
+</script>

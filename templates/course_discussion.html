@@ -1,0 +1,732 @@
+{% extends "user_layout.html" %}
+
+{% block title %}Discussion Forum - {{ subject.name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Modern Futuristic Theme for Discussion Forum */
+    .discussion-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .discussion-header h2 {
+        color: #000;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .discussion-header p {
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .back-to-course-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #000;
+        font-weight: 600;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .back-to-course-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .discussion-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+    
+    .discussion-messages {
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 1.5rem;
+    }
+    
+    .message-item {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .message-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .message-item:hover::before {
+        left: 100%;
+    }
+    
+    .message-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .message-own {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: rgba(0, 212, 255, 0.3);
+    }
+    
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+    }
+    
+    .message-content {
+        flex: 1;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message-author {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .message-time {
+        color: #cccccc;
+        font-size: 0.8rem;
+    }
+    
+    .message-text {
+        color: #ffffff;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message-actions {
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .message-item:hover .message-actions {
+        opacity: 1;
+    }
+    
+    .message-action-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .message-action-btn:hover {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+        color: #00d4ff;
+    }
+    
+    .message-form {
+        background: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    }
+    
+    .message-input {
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        border-radius: 25px;
+        color: #ffffff;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .message-input:focus {
+        border-color: #00d4ff;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        background: rgba(0, 0, 0, 0.65);
+        outline: none;
+    }
+    
+    .message-input::placeholder {
+        color: #d7f6ff;
+        opacity: 0.9;
+    }
+    
+    .send-message-btn {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .send-message-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+    }
+    
+    .no-messages {
+        text-align: center;
+        padding: 3rem;
+        color: #ffffff;
+    }
+    
+    .no-messages h3 {
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+    
+    .no-messages p {
+        color: #cccccc;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="container-fluid discussion-page">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="discussion-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-comments me-2"></i>Discussion Forum
+                        </h2>
+                        <p class="text-muted mb-0">{{ subject.name }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.user_subject_details', user_id=user.id, subject_id=subject.id) }}" 
+                           class="btn back-to-course-btn">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discussion Messages -->
+            <div class="discussion-container">
+                <div class="discussion-messages" id="discussionMessages">
+                    {% if discussions %}
+                        {% for discussion in discussions %}
+                        <div class="message-item {% if discussion.user_id == user.id %}message-own{% endif %}" data-message-id="{{ discussion.id }}">
+                            <div class="message-avatar">
+                                {% if discussion.user.role == 2 %}
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-author">
+                                        {{ discussion.user.full_name or discussion.user.email }}
+                                        {% if discussion.user.role == 2 %}
+                                            <span class="badge bg-primary ms-1">Teacher</span>
+                                        {% endif %}
+                                    </span>
+                                    <div class="message-actions">
+                                        {% if discussion.user_id == user.id %}
+                                        <div class="message-menu">
+                                            <button class="menu-toggle" onclick="toggleMessageMenu({{ discussion.id }})">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="message-menu-dropdown" id="menu-{{ discussion.id }}">
+                                                <button onclick="editMessage({{ discussion.id }}, '{{ discussion.message|e }}')">
+                                                    <i class="fas fa-edit me-2"></i>Edit
+                                                </button>
+                                                <button onclick="deleteMessage({{ discussion.id }})">
+                                                    <i class="fas fa-trash me-2"></i>Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="message-text" id="message-text-{{ discussion.id }}">
+                                    {{ discussion.message }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-messages">
+                            <i class="fas fa-comments-slash"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-container">
+                    <form method="POST" class="message-form">
+                        <div class="input-group">
+                            <textarea class="form-control message-input" 
+                                    name="message" 
+                                    placeholder="Type your message here..." 
+                                    rows="2" 
+                                    required></textarea>
+                            <button class="btn btn-primary send-button" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional Modern Futuristic Theme Enhancements */
+.discussion-messages {
+    background: rgba(10, 10, 10, 0.8) !important;
+    backdrop-filter: blur(20px);
+}
+
+.message-item {
+    display: flex;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.3s ease-out;
+    background: rgba(10, 10, 10, 0.8) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 15px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.message-item:hover::before {
+    left: 100%;
+}
+
+.message-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+    border-color: #00d4ff;
+}
+
+.message-item.message-own {
+    flex-direction: row-reverse;
+    background: rgba(0, 212, 255, 0.1) !important;
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #00d4ff, #ff00ff);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 1rem;
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+.message-own .message-avatar {
+    background: linear-gradient(45deg, #00d4ff, #ff00ff);
+    color: #000;
+}
+
+.message-content {
+    flex: 1;
+    max-width: 70%;
+    color: #ffffff;
+}
+
+.message-own .message-content {
+    text-align: right;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.message-own .message-header {
+    flex-direction: row-reverse;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.message-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.menu-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #495057;
+}
+
+.message-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    min-width: 120px;
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+}
+
+.message-menu-dropdown.show {
+    display: block;
+}
+
+.message-menu-dropdown button {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #ffffff;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.message-menu-dropdown button:hover {
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+}
+
+.message-menu-dropdown button:first-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-menu-dropdown button i {
+    color: #00d4ff;
+}
+
+.message-author {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: #cccccc;
+}
+
+    .message-text {
+        background: rgba(16, 18, 24, 0.92); /* darker for readability */
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        padding: 1rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        word-wrap: break-word;
+        color: #e6f7ff; /* brighter text */
+        transition: all 0.3s ease;
+    }
+    
+    .message-own .message-text {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        color: #000;
+        border-color: rgba(0, 212, 255, 0.3);
+    }
+
+.no-messages {
+    text-align: center;
+    padding: 3rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+.no-messages i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #00d4ff;
+}
+
+.message-input-container {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-form .input-group {
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-input {
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    resize: none;
+    padding: 1rem 1.5rem;
+    background: rgba(16, 18, 24, 0.92);
+    color: #ffffff !important; /* enforce bright text */
+    -webkit-text-fill-color: #ffffff; /* ensure Safari/WebKit */
+    font-weight: 600;
+    text-shadow: 0 0 2px rgba(0,0,0,0.6);
+    caret-color: #00e5ff; /* visible cursor */
+}
+
+.message-input:focus {
+    box-shadow: 0 0 0 0.15rem rgba(0, 212, 255, 0.25);
+    border: 1px solid #00e5ff;
+    background: rgba(16, 18, 24, 0.96);
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff;
+    outline: none;
+}
+
+.message-input::placeholder {
+    color: #e7faff !important;
+    opacity: 0.95;
+}
+
+.message-input::selection {
+    background: rgba(0, 212, 255, 0.35);
+    color: #061016;
+}
+
+.send-button {
+    border: none;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.send-button:hover {
+    background: linear-gradient(135deg, #00b8e6 0%, #e600e6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+    color: #000;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar styling */
+.discussion-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.discussion-messages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.discussion-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #00d4ff, #ff00ff);
+    border-radius: 3px;
+}
+
+.discussion-messages::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #00b8e6, #e600e6);
+}
+</style>
+
+<style>
+/* Page background theme for discussion */
+.discussion-page {
+    background: radial-gradient(1200px circle at 20% 0%, rgba(0,212,255,0.15), transparent 40%),
+                radial-gradient(1000px circle at 80% 30%, rgba(168,85,247,0.15), transparent 45%),
+                linear-gradient(180deg, #0b0f19, #121826 60%, #0b0f19) !important;
+    min-height: 100vh;
+    width: 100%;
+    padding-bottom: 2rem;
+    position: relative;
+}
+</style>
+
+<script>
+// Auto-scroll to bottom when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('discussionMessages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// Auto-resize textarea
+document.querySelector('.message-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+});
+
+// Focus on message input
+document.querySelector('.message-input').focus();
+
+// Toggle message menu
+function toggleMessageMenu(messageId) {
+    // Close all other menus
+    document.querySelectorAll('.message-menu-dropdown').forEach(menu => {
+        if (menu.id !== `menu-${messageId}`) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Toggle current menu
+    const menu = document.getElementById(`menu-${messageId}`);
+    menu.classList.toggle('show');
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.message-menu')) {
+        document.querySelectorAll('.message-menu-dropdown').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+// Edit message
+function editMessage(messageId, currentMessage) {
+    const messageTextElement = document.getElementById(`message-text-${messageId}`);
+    const newMessage = prompt('Edit your message:', currentMessage);
+    
+    if (newMessage !== null && newMessage.trim() !== '' && newMessage !== currentMessage) {
+        fetch(`/api/discussions/${messageId}/edit`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: newMessage.trim() })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+            } else {
+                messageTextElement.textContent = newMessage.trim();
+                // Close the menu
+                document.getElementById(`menu-${messageId}`).classList.remove('show');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while editing the message.');
+        });
+    }
+}
+
+// Delete message
+function deleteMessage(messageId) {
+    if (confirm('Are you sure you want to delete this message?')) {
+        fetch(`/api/discussions/${messageId}/delete`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+            } else {
+                // Remove the message element
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the message.');
+        });
+    }
+}
+</script>
+{% endblock %}

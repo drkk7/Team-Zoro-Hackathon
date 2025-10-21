@@ -1,0 +1,97 @@
+{% extends "admin_layout.html" %}
+
+{% block admin_content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-white mb-0"><i class="fas fa-folder-open me-2"></i>{{ chapter.name }} Materials</h2>
+        <a href="{{ url_for('main.teacher_dashboard', id=current_user.id, name=current_user.full_name) }}" class="btn btn-outline-light btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+
+    <div class="card glass-card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('main.teacher_add_material', teacher_id=current_user.id, chapter_id=chapter.id) }}" method="POST" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Title</label>
+                    <input type="text" name="title" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Type</label>
+                    <select name="material_type" class="form-select">
+                        <option value="file">File upload</option>
+                        <option value="link">External link</option>
+                        <option value="text">Text note</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">File</label>
+                    <input type="file" name="file" class="form-control">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">External URL (if link)</label>
+                    <input type="url" name="external_url" class="form-control" placeholder="https://example.com/resource.pdf">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" rows="2" class="form-control"></textarea>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Add Material</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card glass-card">
+        <div class="card-header"><strong>Materials</strong></div>
+        <div class="card-body">
+            {% if materials %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in materials %}
+                        <tr>
+                            <td>{{ m.title }}</td>
+                            <td>{{ m.material_type }}{% if m.file_type %} ({{ m.file_type }}){% endif %}</td>
+                            <td>{% if m.file_size %}{{ (m.file_size / 1024) | round(1) }} KB{% else %}-{% endif %}</td>
+                            <td>
+                                {% if m.material_type == 'file' and m.file_path %}
+                                    {# m.file_path is like 'uploads/materials/<filename>' -> strip prefix #}
+                                    {% set rel = m.file_path.split('uploads/materials/')[-1] %}
+                                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.uploaded_file', filename=rel) }}">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
+                                {% elif m.material_type == 'link' and m.external_url %}
+                                    <a class="btn btn-outline-primary btn-sm" href="{{ m.external_url }}" target="_blank" rel="noopener">
+                                        <i class="fas fa-external-link-alt me-1"></i>Open Link
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                                <form action="{{ url_for('main.teacher_delete_material', teacher_id=current_user.id, material_id=m.id) }}" method="POST" class="d-inline">
+                                    <button class="btn btn-danger btn-sm" onclick="return confirm('Delete this material?')">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="text-muted">No materials yet for this chapter.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "admin_layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Admin Summary</h2>
+            
+            {% if plot_url %}
+                <div class="text-center">
+                    <img src="data:image/png;base64,{{ plot_url }}" alt="Admin Summary Chart" class="img-fluid">
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <h4>No Data Available</h4>
+                    <p>There is no quiz data available to display in the summary.</p>
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.admin_dashboard', name=user.email) }}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

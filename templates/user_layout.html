@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{% block page_title %}User Dashboard{% endblock %} - EduFlow{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg glass-navbar fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('main.user_dashboard', id=user.id, name=user.full_name) }}">
+            <i class="fas fa-graduation-cap me-2"></i>EduFlow
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'main.user_dashboard' %}active fw-bold{% endif %}" 
+                       href="{{ url_for('main.user_dashboard', id=user.id, name=user.full_name) }}">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'main.course_registration' %}active fw-bold{% endif %}" 
+                       href="{{ url_for('main.course_registration', user_id=user.id) }}">
+                        <i class="fas fa-book me-1"></i>Course Registration
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Search Form -->
+            <form class="d-flex me-3" method="POST" action="{{ url_for('main.user_search', id=user.id, name=user.full_name) }}">
+                <div class="input-group">
+                    <input class="form-control search-form" type="search" placeholder="Search quizzes or chapters..." 
+                           name="search_text" value="{{ search_text or '' }}" style="border-radius: 25px 0 0 25px;">
+                    <button class="btn search-btn" type="submit" style="border-radius: 0 25px 25px 0;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- User Menu -->
+            <div class="navbar-nav">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" 
+                       data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-2"></i>
+                        <span>{{ user.full_name }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid" style="padding-top: 80px; min-height: 100vh;">
+    {% block user_content %}{% endblock %}
+</div>
+
+<style>
+    .navbar-nav .nav-link {
+        color: #ffffff !important; /* brighter text for visibility */
+        font-weight: 600;
+        transition: all 0.25s ease;
+        border-radius: 999px;
+        margin: 0 0.25rem;
+        padding: 0.6rem 1rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background: rgba(0, 212, 255, 0.12);
+        color: #00d4ff !important;
+        transform: translateY(-1px);
+    }
+    
+    .navbar-nav .nav-link.active {
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff);
+        color: #000 !important;
+        box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+        font-weight: 800;
+    }
+    
+    .dropdown-menu {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .dropdown-item {
+        border-radius: 10px;
+        margin: 0.25rem;
+        transition: all 0.3s ease;
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+    
+    .navbar-brand {
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff);
+        color: #000 !important;
+        font-size: 1.5rem;
+        font-weight: 900;
+        padding: 8px 14px;
+        border-radius: 999px;
+        box-shadow: 0 10px 24px rgba(0, 212, 255, 0.35);
+    }
+    
+    .navbar-brand:hover {
+        filter: brightness(1.06) saturate(1.05);
+        transform: translateY(-1px);
+        color: #000 !important;
+    }
+
+    /* Clearer search styles */
+    .search-form {
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 8px 18px rgba(0,0,0,0.25);
+    }
+    .search-form::placeholder { color: #dff7ff; opacity: 0.95; }
+    .search-form:focus {
+        border-color: #00e5ff;
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.45);
+        background: rgba(0, 0, 0, 0.55);
+    }
+    .search-btn {
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 800;
+        box-shadow: 0 8px 22px rgba(0, 212, 255, 0.35);
+    }
+    .search-btn:hover { transform: translateY(-1px); }
+</style>
+{% endblock %}

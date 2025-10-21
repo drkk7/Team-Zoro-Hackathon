@@ -1,0 +1,26 @@
+{% extends "user_layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Your Performance Summary</h2>
+            
+            {% if plot_url %}
+                <div class="text-center">
+                    <img src="data:image/png;base64,{{ plot_url }}" alt="Performance Chart" class="img-fluid">
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <h4>No Performance Data Available</h4>
+                    <p>You haven't taken any quizzes yet. Start by taking your first quiz to see your performance summary!</p>
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.user_dashboard', id=user.id, name=user.full_name) }}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

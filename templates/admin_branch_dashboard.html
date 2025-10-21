@@ -1,0 +1,460 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}{{ branch.name }} Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Branch Header -->
+            <div class="branch-dashboard-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="branch-info">
+                        <div class="d-flex align-items-center">
+                            <div class="branch-icon" style="color: {{ branch.color or '#667eea' }}">
+                                {% if branch.icon %}
+                                    <i class="{{ branch.icon }}"></i>
+                                {% else %}
+                                    <i class="fas fa-cogs"></i>
+                                {% endif %}
+                            </div>
+                            <div class="branch-details">
+                                <h2 class="branch-name">{{ branch.name }}</h2>
+                                <p class="branch-short">{{ branch.short_name }}</p>
+                                {% if branch.description %}
+                                    <p class="branch-description">{{ branch.description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="branch-actions">
+                        <a href="{{ url_for('main.admin_branches') }}" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i>Back to All Branches
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ students|length }}</h3>
+                            <p>Students</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ subjects|length }}</h3>
+                            <p>Subjects</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ active_enrollments }}</h3>
+                            <p>Active Enrollments</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_enrollments }}</h3>
+                            <p>Total Enrollments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <!-- Students Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-users me-2"></i>Students in {{ branch.short_name }}</h5>
+                            <a href="{{ url_for('main.admin_branch_students', branch_id=branch.id) }}" class="btn btn-sm btn-outline-primary">
+                                View All
+                            </a>
+                        </div>
+                        <div class="section-content">
+                            {% if students %}
+                                <div class="student-list">
+                                    {% for student in students[:5] %}
+                                    <div class="student-item">
+                                        <div class="student-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="student-info">
+                                            <h6 class="student-name">{{ student.full_name }}</h6>
+                                            <p class="student-email">{{ student.email }}</p>
+                                        </div>
+                                        <div class="student-status">
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% if students|length > 5 %}
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">And {{ students|length - 5 }} more students...</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="no-data">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <p>No students in this branch yet</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-book me-2"></i>Subjects in {{ branch.short_name }}</h5>
+                            <a href="{{ url_for('main.admin_branch_subjects', branch_id=branch.id) }}" class="btn btn-sm btn-outline-primary">
+                                View All
+                            </a>
+                        </div>
+                        <div class="section-content">
+                            {% if subjects %}
+                                <div class="subject-list">
+                                    {% for subject in subjects[:5] %}
+                                    <div class="subject-item">
+                                        <div class="subject-info">
+                                            <h6 class="subject-name">{{ subject.name }}</h6>
+                                            {% if subject.description %}
+                                                <p class="subject-description">{{ subject.description[:50] }}{% if subject.description|length > 50 %}...{% endif %}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="subject-badges">
+                                            {% if subject.is_core %}
+                                                <span class="badge bg-primary">Core</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Elective</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% if subjects|length > 5 %}
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">And {{ subjects|length - 5 }} more subjects...</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="no-data">
+                                    <i class="fas fa-book fa-2x mb-2"></i>
+                                    <p>No subjects in this branch yet</p>
+                                    <a href="{{ url_for('main.admin_branches') }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add Subjects
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            {% if recent_scores %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-chart-line me-2"></i>Recent Activity</h5>
+                        </div>
+                        <div class="section-content">
+                            <div class="activity-list">
+                                {% for score in recent_scores %}
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6>{{ score.user.full_name }} completed {{ score.quiz.name }}</h6>
+                                        <p class="text-muted">
+                                            {{ score.quiz.chapter.subject.name }} • 
+                                            {{ score.total_scored }}/{{ score.quiz.questions|length }} • 
+                                            {{ score.time_stamp_of_attempt.strftime('%B %d, %Y at %I:%M %p') }}
+                                        </p>
+                                    </div>
+                                    <div class="activity-score">
+                                        <span class="badge bg-success">{{ (score.total_scored / score.quiz.questions|length * 100)|round|int }}%</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.branch-dashboard-header {
+    background: linear-gradient(135deg, {{ branch.color or '#667eea' }} 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+}
+
+.branch-info {
+    flex: 1;
+}
+
+.branch-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    margin-right: 1.5rem;
+}
+
+.branch-details {
+    flex: 1;
+}
+
+.branch-name {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-size: 2rem;
+}
+
+.branch-short {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.branch-description {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #495057;
+}
+
+.stat-content p {
+    color: #6c757d;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.dashboard-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h5 {
+    margin-bottom: 0;
+    color: #495057;
+    font-weight: 600;
+}
+
+.section-content {
+    padding: 1.5rem;
+}
+
+.student-list, .subject-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.student-item, .subject-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.student-item:last-child, .subject-item:last-child {
+    border-bottom: none;
+}
+
+.student-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: #6c757d;
+}
+
+.student-info, .subject-info {
+    flex: 1;
+}
+
+.student-name, .subject-name {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.student-email, .subject-description {
+    margin-bottom: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.student-status {
+    margin-left: 1rem;
+}
+
+.activity-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content h6 {
+    margin-bottom: 0.25rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+.activity-score {
+    margin-left: 1rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.no-data i {
+    opacity: 0.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .branch-dashboard-header {
+        padding: 1.5rem;
+    }
+    
+    .branch-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .branch-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

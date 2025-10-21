@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - EduFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="glass-card p-5 fade-in">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus" style="font-size: 3rem; background: linear-gradient(45deg, #00d4ff, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+                    <h2 class="section-title mt-3">Create Your Account</h2>
+                    <p class="text-secondary">Join EduFlow and start your learning journey</p>
+                </div>
+                
+                {% if msg %}
+                    <div class="alert alert-danger fade-in">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ msg }}
+                    </div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('main.signup') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #00d4ff;">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-user" style="color: #00d4ff;"></i>
+                                </span>
+                                <input type="text" name="full_name" class="form-control border-start-0" placeholder="Enter your full name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #00d4ff;">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-envelope" style="color: #00d4ff;"></i>
+                                </span>
+                                <input type="email" name="user_name" class="form-control border-start-0" placeholder="Enter your email" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                <input type="password" name="password" class="form-control border-start-0" placeholder="Enter your password" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                <input type="password" name="confirm_password" class="form-control border-start-0" placeholder="Confirm your password" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Qualification</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-graduation-cap text-muted"></i>
+                                </span>
+                                <input type="text" name="qualification" class="form-control border-start-0" placeholder="e.g., B.Tech, M.Tech" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Date of Birth</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-calendar text-muted"></i>
+                                </span>
+                                <input type="date" name="dob" class="form-control border-start-0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-map-marker-alt text-muted"></i>
+                                </span>
+                                <input type="text" name="location" class="form-control border-start-0" placeholder="Enter your address" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Pin Code</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-map-pin text-muted"></i>
+                                </span>
+                                <input type="text" name="pin_code" class="form-control border-start-0" placeholder="Pin code" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn-success-gradient neon-glow">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4 fade-in">
+                    <p class="mb-0 text-secondary">Already have an account? 
+                        <a href="{{ url_for('main.signin') }}" class="text-decoration-none fw-bold" style="color: #00d4ff;">Sign in here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-group-text {
+        border-radius: 15px 0 0 15px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        background: rgba(255, 255, 255, 0.05);
+        color: #00d4ff;
+    }
+    
+    .input-group .form-control {
+        border-radius: 0 15px 15px 0;
+        border-left: none;
+    }
+    
+    .input-group .form-control:focus {
+        border-left: none;
+        box-shadow: none;
+    }
+    
+    .input-group:focus-within .input-group-text {
+        border-color: #00d4ff;
+        background: rgba(0, 212, 255, 0.1);
+    }
+    
+    .input-group:focus-within .form-control {
+        border-color: #00d4ff;
+    }
+    
+    .glass-card {
+        animation: slideInUp 0.8s ease-out;
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

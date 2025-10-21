@@ -1,0 +1,316 @@
+{% extends "user_layout.html" %}
+
+{% block user_content %}
+<style>
+    .dashboard-container {
+        background: transparent;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .main-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        background: linear-gradient(45deg, #ffffff, #00d4ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    
+    .course-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .course-card:hover::before {
+        left: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .course-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        color: #000;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .course-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.3;
+    }
+    
+    .course-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        color: #000;
+    }
+    
+    
+    .course-body {
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .progress-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-label {
+        font-size: 0.9rem;
+        color: #cccccc;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .progress-bar-custom {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00d4ff 0%, #ff00ff 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    
+    .progress-text {
+        font-size: 0.9rem;
+        color: #ffffff;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .quiz-scores {
+        margin-bottom: 1.5rem;
+    }
+    
+    .quiz-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .quiz-item:last-child {
+        border-bottom: none;
+    }
+    
+    .quiz-name {
+        font-size: 0.9rem;
+        color: #cccccc;
+    }
+    
+    .quiz-score {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .score-pass {
+        color: #00d4ff;
+    }
+    
+    .score-fail {
+        color: #ff4757;
+    }
+    
+    .score-absent {
+        color: #999999;
+    }
+    
+    .status-registered {
+        color: #00d4ff;
+        font-weight: 600;
+    }
+    
+    .go-to-course-btn {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+    
+    .go-to-course-btn:hover {
+        color: #000;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.5);
+    }
+    
+    .no-courses-alert {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+    
+    .no-courses-icon {
+        font-size: 4rem;
+        color: #00d4ff;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+</style>
+
+<div class="dashboard-container">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="main-title">My Current Courses</h1>
+            </div>
+        </div>
+        
+        
+        {% if subjects %}
+            <div class="row">
+                {% for subject in subjects %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="course-card fade-in">
+                            <!-- Course Header -->
+                            <div class="course-header">
+                                <h5 class="course-title">{{ subject.name }}</h5>
+                            </div>
+                            
+                            <!-- Course Body -->
+                            <div class="course-body">
+                                <!-- Progress Section -->
+                                <div class="progress-section">
+                                    <div class="progress-label">Course Progress</div>
+                                    <div class="progress-bar-custom">
+                                        {% set progress_percent = subject.progress_percentage if subject.progress_percentage else 0 %}
+                                        {% set capped_progress = progress_percent if progress_percent <= 100 else 100 %}
+                                        <div class="progress-fill" style="width: {{ capped_progress }}%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        {{ "%.0f"|format(capped_progress) }}% complete
+                                    </div>
+                                </div>
+                                
+                                <!-- Quiz Scores -->
+                                <div class="quiz-scores">
+                                    {% if subject.chapters %}
+                                        {% set has_quizzes = false %}
+                                        {% for chapter in subject.chapters %}
+                                            {% if chapter.quizzes %}
+                                                {% set has_quizzes = true %}
+                                                {% for quiz in chapter.quizzes %}
+                                                    <div class="quiz-item">
+                                                        <span class="quiz-name">{{ quiz.name }}</span>
+                                                        {% if quiz.user_score is not none %}
+                                                            {% set total_questions = quiz.questions|length if quiz.questions else 1 %}
+                                                            {% set quiz_percentage = (quiz.user_score / total_questions * 100) if total_questions > 0 else 0 %}
+                                                            <span class="quiz-score score-pass">{{ quiz.user_score }}/{{ total_questions }} ({{ "%.0f"|format(quiz_percentage) }}%)</span>
+                                                        {% else %}
+                                                            <span class="quiz-score score-absent">Not Attempted</span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not has_quizzes %}
+                                            <div class="quiz-item">
+                                                <span class="quiz-name">No quizzes available</span>
+                                                <span class="quiz-score score-absent">-</span>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="quiz-item">
+                                            <span class="quiz-name">No quizzes available</span>
+                                            <span class="quiz-score score-absent">-</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="text-center">
+                                    <a href="{{ url_for('main.user_subject_details', user_id=user.id, subject_id=subject.id) }}" class="go-to-course-btn">
+                                        Go to Course page >
+                                    </a>
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('main.course_discussion', user_id=user.id, subject_id=subject.id) }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-comments me-1"></i>Discussion Forum
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="no-courses-alert">
+                        <div class="no-courses-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h4>No Enrolled Courses</h4>
+                        <p class="mb-3">You haven't enrolled in any courses yet. Visit the Course Registration page to enroll in available courses.</p>
+                        <a href="{{ url_for('main.course_registration', user_id=user.id) }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-book me-2"></i>Go to Course Registration
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+{% block title %}Assignment - {{ quiz.name }} - EduFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-5 fade-in">
+                <div class="text-center mb-4">
+                    <h2 class="section-title">
+                        <i class="fas fa-question-circle me-2" style="background: linear-gradient(45deg, #00d4ff, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>{{ quiz.name }}
+                    </h2>
+                    <p class="text-secondary">Answer all questions to complete the assignment</p>
+                    
+                    <!-- Timer Display -->
+                    <div class="timer-wrapper mb-4">
+                        <div class="timer-circle">
+                            <div class="timer-content">
+                                <i class="fas fa-clock timer-icon"></i>
+                                <div class="timer-text">
+                                    <span id="timer-display">00:00</span>
+                                    <small class="timer-label">Time Remaining</small>
+                                </div>
+                            </div>
+                            <div class="timer-progress">
+                                <div class="timer-progress-bar" id="timer-progress-bar"></div>
+                            </div>
+                        </div>
+                        <div class="timer-warning" id="timer-warning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="warning-text">Time is running out!</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="POST" action="{{ url_for('main.attempt_quiz', quiz_id=quiz.id, user_id=user_id) }}">
+                    {% for question in questions %}
+                        <div class="mb-4 fade-in">
+                            <h5 style="color: #ffffff; margin-bottom: 1rem;">{{ loop.index }}. {{ question.question_statement }}</h5>
+                            <div class="question-options">
+                                <div class="option-item">
+                                    <label class="option-label">
+                                        <input type="radio" name="question_{{ question.id }}" value="{{ question.option1|trim }}" required>
+                                        <span class="option-text">{{ question.option1 }}</span>
+                                    </label>
+                                </div>
+                                <div class="option-item">
+                                    <label class="option-label">
+                                        <input type="radio" name="question_{{ question.id }}" value="{{ question.option2|trim }}">
+                                        <span class="option-text">{{ question.option2 }}</span>
+                                    </label>
+                                </div>
+                                <div class="option-item">
+                                    <label class="option-label">
+                                        <input type="radio" name="question_{{ question.id }}" value="{{ question.option3|trim }}">
+                                        <span class="option-text">{{ question.option3 }}</span>
+                                    </label>
+                                </div>
+                                <div class="option-item">
+                                    <label class="option-label">
+                                        <input type="radio" name="question_{{ question.id }}" value="{{ question.option4|trim }}">
+                                        <span class="option-text">{{ question.option4 }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- For debugging: show correct option -->
+                            {# <div class="text-muted small">Correct: {{ question.correct_option }}</div> #}
+                        </div>
+                    {% endfor %}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn-success-gradient neon-glow">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Assignment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .question-options {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .option-item {
+        margin-bottom: 1rem;
+    }
+    
+    .option-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .option-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 1rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        color: #ffffff;
+    }
+    
+    .option-label:hover {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: #00d4ff;
+        transform: translateX(5px);
+    }
+    
+    .option-label input[type="radio"] {
+        margin-right: 1rem;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .option-label input[type="radio"]:checked {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border-color: #00d4ff;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    
+    .option-label input[type="radio"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.25);
+    }
+    
+    .option-text {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    .form-check-input {
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .form-check-input:checked {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border-color: #00d4ff;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-check-label:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .options-container {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Modern Futuristic Timer Styles */
+    .timer-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .timer-circle {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+    
+    .timer-circle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(0, 212, 255, 0.5);
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3); }
+        50% { box-shadow: 0 8px 25px rgba(0, 212, 255, 0.6); }
+        100% { box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3); }
+    }
+    
+    .timer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #000;
+        z-index: 2;
+    }
+    
+    .timer-icon {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+        color: #000;
+    }
+    
+    .timer-text {
+        text-align: center;
+    }
+    
+    #timer-display {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+        display: block;
+        color: #000;
+    }
+    
+    .timer-label {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .timer-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.2) 0deg);
+        transition: all 0.3s ease;
+    }
+    
+    .timer-progress-bar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 0deg, transparent 0deg);
+        transition: all 1s ease;
+    }
+    
+    .timer-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        animation: gentle-pulse 2s infinite;
+    }
+    
+    .timer-warning.critical {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        animation: urgent-pulse 1s infinite;
+    }
+    
+    @keyframes gentle-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.02); opacity: 0.9; }
+    }
+    
+    @keyframes urgent-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get quiz duration from the server
+    const quizDuration = "{{ quiz.time_duration }}";
+    console.log('Quiz duration from server:', quizDuration);
+    
+    // Parse duration with better regex patterns
+    let totalSeconds = 0;
+    
+    // Try to parse different duration formats
+    if (quizDuration) {
+        // Handle MM:SS or HH:MM:SS format (like "00:05" or "01:30:00")
+        if (quizDuration.includes(':')) {
+            const timeParts = quizDuration.split(':');
+            if (timeParts.length === 2) {
+                // MM:SS format
+                const minutes = parseInt(timeParts[0]) || 0;
+                const seconds = parseInt(timeParts[1]) || 0;
+                totalSeconds = minutes * 60 + seconds;
+                console.log('Parsed MM:SS format:', minutes, 'minutes', seconds, 'seconds, Total:', totalSeconds);
+            } else if (timeParts.length === 3) {
+                // HH:MM:SS format
+                const hours = parseInt(timeParts[0]) || 0;
+                const minutes = parseInt(timeParts[1]) || 0;
+                const seconds = parseInt(timeParts[2]) || 0;
+                totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                console.log('Parsed HH:MM:SS format:', hours, 'hours', minutes, 'minutes', seconds, 'seconds, Total:', totalSeconds);
+            }
+        }
+        // Handle word-based formats
+        else if (quizDuration.includes('hour')) {
+            const match = quizDuration.match(/(\d+)\s*hour/i);
+            if (match) {
+                const hours = parseInt(match[1]);
+                totalSeconds = hours * 3600;
+                console.log('Parsed hours:', hours, 'Total seconds:', totalSeconds);
+            }
+        } else if (quizDuration.includes('minute')) {
+            const match = quizDuration.match(/(\d+)\s*minute/i);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                totalSeconds = minutes * 60;
+                console.log('Parsed minutes:', minutes, 'Total seconds:', totalSeconds);
+            }
+        } else if (quizDuration.includes('second')) {
+            const match = quizDuration.match(/(\d+)\s*second/i);
+            if (match) {
+                totalSeconds = parseInt(match[1]);
+                console.log('Parsed seconds:', totalSeconds);
+            }
+        } else {
+            // Try to extract just numbers (assume minutes)
+            const numbers = quizDuration.match(/\d+/);
+            if (numbers) {
+                totalSeconds = parseInt(numbers[0]) * 60; // Assume minutes
+                console.log('Extracted number:', numbers[0], 'Total seconds:', totalSeconds);
+            }
+        }
+    }
+    
+    // Force assignment duration to 30 seconds for all quizzes
+    totalSeconds = 30;
+    console.log('Assignment duration forced to 30 seconds');
+    
+    console.log('Final total seconds:', totalSeconds);
+    console.log('Timer will run for:', Math.floor(totalSeconds / 60), 'minutes and', totalSeconds % 60, 'seconds');
+    
+    let timeLeft = totalSeconds;
+    const timerDisplay = document.getElementById('timer-display');
+    const timerWarning = document.getElementById('timer-warning');
+    const warningText = document.getElementById('warning-text');
+    const progressBar = document.getElementById('timer-progress-bar');
+    const quizForm = document.querySelector('form');
+    
+    // Update timer display
+    function updateTimer() {
+        // Ensure timeLeft is never negative
+        if (timeLeft < 0) {
+            timeLeft = 0;
+        }
+        
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+        
+        // Update timer display
+        if (hours > 0) {
+            timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Update progress bar
+        const progressPercentage = Math.max(0, Math.min(100, ((totalSeconds - timeLeft) / totalSeconds) * 100));
+        const degrees = (progressPercentage / 100) * 360;
+        progressBar.style.background = `conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 ${degrees}deg, transparent ${degrees}deg)`;
+        
+        // Show warnings based on total duration
+        if (totalSeconds <= 10) {
+            // For very short durations (≤10 seconds), show warning at 3 seconds
+            if (timeLeft <= 3 && timeLeft > 0) {
+                timerWarning.style.display = 'block';
+                timerWarning.classList.add('critical');
+                warningText.textContent = `${timeLeft} seconds remaining!`;
+            }
+        } else if (totalSeconds <= 60) {
+            // For short durations (≤1 minute), show warning at 10 seconds
+            if (timeLeft <= 10 && timeLeft > 0) {
+                timerWarning.style.display = 'block';
+                timerWarning.classList.add('critical');
+                warningText.textContent = `${timeLeft} seconds remaining!`;
+            }
+        } else {
+            // For longer durations, show progressive warnings
+            if (timeLeft <= 300 && timeLeft > 60) {
+                timerWarning.style.display = 'block';
+                warningText.textContent = '5 minutes remaining!';
+            }
+            // Show critical warning when 1 minute left
+            else if (timeLeft <= 60 && timeLeft > 0) {
+                timerWarning.style.display = 'block';
+                timerWarning.classList.add('critical');
+                warningText.textContent = '1 minute remaining!';
+            }
+            // Show final warning when 10 seconds left
+            else if (timeLeft <= 10 && timeLeft > 0) {
+                timerWarning.style.display = 'block';
+                timerWarning.classList.add('critical');
+                warningText.textContent = `${timeLeft} seconds remaining!`;
+            }
+        }
+    }
+    
+    // Auto-submit when time is up
+    function autoSubmit() {
+        // Show final warning
+        timerWarning.style.display = 'block';
+        timerWarning.classList.add('critical');
+        warningText.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Time\'s up! Auto-submitting...';
+        
+        // Disable all form inputs
+        const inputs = quizForm.querySelectorAll('input, button');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+        
+        // Auto-submit after 2 seconds
+        setTimeout(() => {
+            quizForm.submit();
+        }, 2000);
+    }
+    
+    // Only start timer if we have a valid duration
+    if (totalSeconds > 0) {
+        // Start the timer
+        const timer = setInterval(() => {
+            timeLeft--;
+            updateTimer();
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                autoSubmit();
+            }
+        }, 1000);
+        
+        // Initial timer display
+        updateTimer();
+    } else {
+        // Show error if no valid duration
+        timerDisplay.textContent = '00:00';
+        timerWarning.style.display = 'block';
+        warningText.textContent = 'No time limit set for this quiz';
+    }
+    
+    // Prevent page refresh/close during quiz
+    window.addEventListener('beforeunload', function(e) {
+        if (timeLeft > 0) {
+            e.preventDefault();
+            e.returnValue = 'Are you sure you want to leave? Your progress will be lost.';
+            return e.returnValue;
+        }
+    });
+    
+    // Handle form submission
+    quizForm.addEventListener('submit', function(e) {
+        clearInterval(timer);
+        // Remove the beforeunload listener
+        window.removeEventListener('beforeunload', function() {});
+    });
+});
+</script>
+{% endblock %}

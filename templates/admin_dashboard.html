@@ -1,0 +1,552 @@
+{% extends "admin_layout.html" %}
+{% block admin_content %}
+{% if selected_branch %}
+<!-- Branch Focus Indicator -->
+<div class="branch-focus-indicator">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="branch-focus-card">
+                    <div class="d-flex align-items-center">
+                        <div class="branch-icon" style="color: {{ selected_branch.color or '#667eea' }}">
+                            {% if selected_branch.icon %}
+                                <i class="{{ selected_branch.icon }}"></i>
+                            {% else %}
+                                <i class="fas fa-cogs"></i>
+                            {% endif %}
+                        </div>
+                        <div class="branch-info">
+                            <h4 class="branch-name">{{ selected_branch.name }} Focus</h4>
+                            <p class="branch-description">Currently viewing data for {{ selected_branch.short_name }} branch</p>
+                        </div>
+                        <div class="branch-actions">
+                            <a href="{{ url_for('main.admin_branch_selection', name=name) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-exchange-alt me-1"></i>Change Branch
+                            </a>
+                            <a href="{{ url_for('main.admin_dashboard', name=name) }}" class="btn btn-outline-secondary btn-sm ms-2">
+                                <i class="fas fa-globe me-1"></i>View All
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<style>
+    .branch-focus-indicator {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .branch-focus-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .branch-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        margin-right: 1.5rem;
+    }
+    
+    .branch-info {
+        flex: 1;
+    }
+    
+    .branch-name {
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        font-size: 1.5rem;
+    }
+    
+    .branch-description {
+        color: #cccccc;
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+    
+    .branch-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .admin-dashboard-container {
+        background: transparent;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .admin-main-title {
+        color: #ffffff;
+        font-size: 2.8rem;
+        font-weight: 700;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        margin-bottom: 2rem;
+        background: linear-gradient(45deg, #ffffff, #00d4ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .search-results-alert {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+        color: #ffffff;
+    }
+    
+    .subject-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .subject-card:hover::before {
+        left: 100%;
+    }
+    
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .subject-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        color: #000;
+        padding: 1.5rem;
+        margin: -1rem -1rem 1rem -1rem;
+    }
+    
+    .subject-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        color: #000;
+    }
+    
+    .subject-description {
+        color: #cccccc;
+        font-style: italic;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .action-buttons {
+        margin-bottom: 1.5rem;
+    }
+    
+    .edit-btn {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+    
+    .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    }
+    
+    .add-chapter-btn {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .add-chapter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+    }
+    
+    .chapter-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-left: 4px solid #00d4ff;
+        transition: all 0.3s ease;
+    }
+    
+    .chapter-section:hover {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: #00d4ff;
+        transform: translateX(5px);
+    }
+    
+    .chapter-title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .chapter-actions {
+        margin-bottom: 1rem;
+    }
+    
+    .add-quiz-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+    
+    .add-quiz-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .quiz-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        margin: 0.8rem 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quiz-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .quiz-card:hover::before {
+        left: 100%;
+    }
+    
+    .quiz-card:hover {
+        border-color: #00d4ff;
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        transform: translateY(-3px);
+    }
+    
+    .quiz-title {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .quiz-actions {
+        margin-top: 1rem;
+    }
+    
+    .add-question-btn {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        border: none;
+        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+    
+    .add-question-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+    }
+    
+    .question-list {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .question-item {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.8rem;
+        margin: 0.5rem 0;
+        border-left: 3px solid #00d4ff;
+        transition: all 0.3s ease;
+    }
+    
+    .question-item:hover {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: #00d4ff;
+        transform: translateX(5px);
+    }
+    
+    .question-text {
+        color: #ffffff;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .edit-question-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 0.3rem 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.8rem;
+    }
+    
+    .edit-question-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+    }
+    
+    .add-subject-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 30px;
+        padding: 1rem 2.5rem;
+        font-weight: 600;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .add-subject-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .no-subjects-alert {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        padding: 3rem;
+        color: #ffffff;
+    }
+    
+    .no-subjects-icon {
+        font-size: 4rem;
+        color: #00d4ff;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    
+    .chapters-found-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .chapters-found-title {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+</style>
+
+<div class="admin-dashboard-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="admin-main-title text-center">⚙️ Admin Dashboard</h1>
+                
+                {% if search_text %}
+                    <div class="search-results-alert alert alert-info text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-search me-2"></i>
+                            <strong>Search Results for:</strong> "{{ search_text }}"
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if subjects %}
+                    <div class="row">
+                        {% for subject in subjects %}
+                            <div class="col-lg-6 col-xl-4">
+                                <div class="subject-card card h-100">
+                                    <div class="subject-header">
+                                        <h5 class="subject-title">
+                                            <i class="fas fa-graduation-cap me-2"></i>{{ subject.name }}
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="subject-description">{{ subject.description or 'No description available' }}</p>
+                                        
+                                        <div class="action-buttons">
+                                            <a href="/edit_subject/{{subject.id}}/{{name}}" class="edit-btn btn">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a>
+                                            <a href="/add_chapter/{{subject.id}}/{{name}}" class="add-chapter-btn btn">
+                                                <i class="fas fa-plus me-1"></i>Add Chapter
+                                            </a>
+                                        </div>
+                                        
+                                        {% if subject.chapters %}
+                                            {% for chapter in subject.chapters %}
+                                                <div class="chapter-section">
+                                                    <h6 class="chapter-title">
+                                                        <i class="fas fa-book me-2"></i>{{ chapter.name }}
+                                                    </h6>
+                                                    
+                                                    <div class="chapter-actions">
+                                                        <a href="/edit_chapter/{{chapter.id}}/{{name}}" class="edit-btn btn btn-sm">
+                                                            <i class="fas fa-edit me-1"></i>Edit
+                                                        </a>
+                                                        <a href="/add_quiz/{{chapter.id}}/{{name}}" class="add-quiz-btn btn btn-sm">
+                                                            <i class="fas fa-plus me-1"></i>Add Quiz
+                                                        </a>
+                                                    </div>
+                                                    
+                                                    {% if chapter.quizzes %}
+                                                        {% for quiz in chapter.quizzes %}
+                                                            <div class="quiz-card card">
+                                                                <div class="card-body">
+                                                                    <h6 class="quiz-title">
+                                                                        <i class="fas fa-question-circle me-2"></i>{{ quiz.name }}
+                                                                    </h6>
+                                                                    
+                                                                    <div class="quiz-actions">
+                                                                        <a href="/edit_quiz/{{quiz.id}}/{{name}}" class="edit-btn btn btn-sm">
+                                                                            <i class="fas fa-edit me-1"></i>Edit
+                                                                        </a>
+                                                                        <a href="/add_question/{{quiz.id}}/{{name}}" class="add-question-btn btn btn-sm">
+                                                                            <i class="fas fa-plus me-1"></i>Add Question
+                                                                        </a>
+                                                                    </div>
+                                                                    
+                                                                    {% if quiz.questions %}
+                                                                        <div class="question-list">
+                                                                            <h6 class="mb-2"><i class="fas fa-list me-1"></i>Questions:</h6>
+                                                                            {% for question in quiz.questions %}
+                                                                                <div class="question-item">
+                                                                                    <p class="question-text">{{ question.question_statement }}</p>
+                                                                                    <a href="/edit_question/{{question.id}}/{{name}}" class="edit-question-btn btn btn-sm">
+                                                                                        <i class="fas fa-edit me-1"></i>Edit
+                                                                                    </a>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-subjects-alert">
+                        <div class="no-subjects-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <h4>No Subjects Available</h4>
+                        <p class="mb-0">Add a subject to get started with your quiz management.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Display search results for chapters -->
+                {% if chapters %}
+                    <div class="chapters-found-section">
+                        <h4 class="chapters-found-title">
+                            <i class="fas fa-search me-2"></i>Chapters Found
+                        </h4>
+                        <div class="row">
+                            {% for chapter in chapters %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="subject-card card">
+                                        <div class="card-body">
+                                            <h5 class="subject-title">
+                                                <i class="fas fa-book me-2"></i>{{ chapter.name }}
+                                            </h5>
+                                            <p class="subject-description">{{ chapter.description or 'No description available' }}</p>
+                                            <div class="action-buttons">
+                                                <a href="/edit_chapter/{{chapter.id}}/{{name}}" class="edit-btn btn">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                                <a href="/add_quiz/{{chapter.id}}/{{name}}" class="add-quiz-btn btn">
+                                                    <i class="fas fa-plus me-1"></i>Add Quiz
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="text-center mt-5">
+                    <a href="/add_subject/{{name}}" class="add-subject-btn btn">
+                        <i class="fas fa-plus me-2"></i>Add New Subject
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}{{ branch.name }} - Students{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Branch Header -->
+            <div class="branch-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="branch-info">
+                        <div class="d-flex align-items-center">
+                            <div class="branch-icon" style="color: {{ branch.color or '#667eea' }}">
+                                {% if branch.icon %}
+                                    <i class="{{ branch.icon }}"></i>
+                                {% else %}
+                                    <i class="fas fa-cogs"></i>
+                                {% endif %}
+                            </div>
+                            <div class="branch-details">
+                                <h2 class="branch-name">{{ branch.name }} - Students</h2>
+                                <p class="branch-short">{{ branch.short_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="branch-actions">
+                        <a href="{{ url_for('main.admin_branch_dashboard', branch_id=branch.id) }}" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students List -->
+            <div class="students-container">
+                {% if students %}
+                    <div class="students-header">
+                        <h5><i class="fas fa-users me-2"></i>Students in {{ branch.name }} ({{ students|length }})</h5>
+                    </div>
+                    
+                    <div class="students-grid">
+                        {% for student in students %}
+                        <div class="student-card">
+                            <div class="student-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="student-info">
+                                <h6 class="student-name">{{ student.full_name }}</h6>
+                                <p class="student-email">{{ student.email }}</p>
+                                <div class="student-details">
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ student.address }}
+                                    </small>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>PIN: {{ student.pin_code }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="student-status">
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-students">
+                        <i class="fas fa-users fa-3x mb-3"></i>
+                        <h4>No Students Yet</h4>
+                        <p>No students have selected this branch yet.</p>
+                        <a href="{{ url_for('main.admin_branches') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Branch Management
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.branch-header {
+    background: linear-gradient(135deg, {{ branch.color or '#667eea' }} 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+}
+
+.branch-info {
+    flex: 1;
+}
+
+.branch-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    margin-right: 1.5rem;
+}
+
+.branch-details {
+    flex: 1;
+}
+
+.branch-name {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-size: 2rem;
+}
+
+.branch-short {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    margin-bottom: 0;
+    font-size: 1.2rem;
+}
+
+.students-container {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.students-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.students-header h5 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.student-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.student-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+.student-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.student-info {
+    flex: 1;
+}
+
+.student-name {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.student-email {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.student-details {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.student-status {
+    margin-left: 1rem;
+}
+
+.no-students {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.no-students i {
+    opacity: 0.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .branch-header {
+        padding: 1.5rem;
+    }
+    
+    .branch-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .branch-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .students-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .student-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .student-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .student-status {
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+}
+</style>
+{% endblock %}

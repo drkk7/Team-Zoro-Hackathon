@@ -1,0 +1,226 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}Assignments - EduFlow{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="main-title">
+                    <i class="fas fa-tasks me-2"></i>Assignment Management
+                </h1>
+                <a href="{{ url_for('notifications.teacher_create_assignment', teacher_id=teacher.id) }}" 
+                   class="btn btn-gradient">
+                    <i class="fas fa-plus me-2"></i>Create New Assignment
+                </a>
+            </div>
+            
+            <!-- Upcoming Deadlines Widget -->
+            {% if upcoming_deadlines %}
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    {% include 'components/deadline_widget.html' %}
+                </div>
+                <div class="col-lg-6">
+                    {% include 'components/notification_widget.html' %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Assignments List -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>All Assignments
+                        <span class="badge bg-primary ms-2">{{ assignments|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if assignments %}
+                        <div class="row">
+                            {% for assignment in assignments %}
+                            <div class="col-lg-6 col-xl-4 mb-4">
+                                <div class="assignment-card">
+                                    <div class="assignment-header">
+                                        <div class="assignment-type">
+                                            <i class="fas fa-{% if assignment.assignment_type == 'quiz' %}question-circle{% elif assignment.assignment_type == 'homework' %}home{% elif assignment.assignment_type == 'project' %}project-diagram{% else %}file-alt{% endif %}"></i>
+                                            {{ assignment.assignment_type.title() }}
+                                        </div>
+                                        <div class="assignment-points">{{ assignment.max_points }} pts</div>
+                                    </div>
+                                    
+                                    <div class="assignment-content">
+                                        <h6 class="assignment-title">{{ assignment.title }}</h6>
+                                        {% if assignment.description %}
+                                            <p class="assignment-description">{{ assignment.description }}</p>
+                                        {% endif %}
+                                        
+                                        <div class="assignment-meta">
+                                            <div class="meta-item">
+                                                <i class="fas fa-book me-1"></i>
+                                                {{ assignment.subject.name }}
+                                            </div>
+                                            {% if assignment.chapter %}
+                                            <div class="meta-item">
+                                                <i class="fas fa-file-alt me-1"></i>
+                                                {{ assignment.chapter.name }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="assignment-deadline">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <strong>Deadline:</strong> {{ assignment.deadline.strftime('%B %d, %Y at %I:%M %p') }}
+                                        </div>
+                                        
+                                        {% if assignment.instructions %}
+                                        <div class="assignment-instructions">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            <strong>Instructions:</strong> {{ assignment.instructions[:100] }}{% if assignment.instructions|length > 100 %}...{% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="assignment-actions">
+                                        <a href="{{ url_for('notifications.teacher_assignment_submissions', teacher_id=teacher.id, assignment_id=assignment.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View Submissions
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="editAssignment({{ assignment.id }})">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-assignments text-center py-5">
+                            <i class="fas fa-tasks fa-3x mb-3 text-muted"></i>
+                            <h4>No Assignments Yet</h4>
+                            <p class="text-muted">Create your first assignment to get started.</p>
+                            <a href="{{ url_for('notifications.teacher_create_assignment', teacher_id=teacher.id) }}" 
+                               class="btn btn-gradient">
+                                <i class="fas fa-plus me-2"></i>Create Assignment
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.assignment-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.assignment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+    border-color: #00d4ff;
+}
+
+.assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.assignment-type {
+    color: #00d4ff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.assignment-points {
+    background: linear-gradient(45deg, #00d4ff, #ff00ff);
+    color: #000;
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.assignment-content {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.assignment-title {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-description {
+    color: #cccccc;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.assignment-meta {
+    margin-bottom: 1rem;
+}
+
+.meta-item {
+    color: #cccccc;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.assignment-deadline {
+    color: #ffffff;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #00d4ff;
+}
+
+.assignment-instructions {
+    color: #cccccc;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.no-assignments {
+    padding: 3rem;
+}
+
+.no-assignments i {
+    color: #00d4ff;
+}
+</style>
+
+<script>
+function editAssignment(assignmentId) {
+    // TODO: Implement edit functionality
+    alert('Edit functionality will be implemented soon!');
+}
+</script>
+{% endblock %}

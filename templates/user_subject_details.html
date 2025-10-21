@@ -1,0 +1,311 @@
+{% extends "user_layout.html" %}
+
+{% block user_content %}
+<style>
+    .subject-details-container {
+        background: transparent;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .subject-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        color: #000;
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .subject-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+        border-radius: 20px;
+    }
+    
+    .subject-header:hover::before {
+        left: 100%;
+    }
+    
+    .subject-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        color: #000;
+    }
+    
+    .subject-description {
+        font-size: 1.1rem;
+        margin-top: 1rem;
+        opacity: 0.8;
+        position: relative;
+        z-index: 1;
+        color: #333;
+    }
+    
+    .chapter-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chapter-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .chapter-section:hover::before {
+        left: 100%;
+    }
+    
+    .chapter-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .chapter-title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .assignment-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .assignment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .assignment-card:hover::before {
+        left: 100%;
+    }
+    
+    .assignment-card:hover {
+        border-color: #00d4ff;
+        box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+        transform: translateY(-3px);
+    }
+    
+    .assignment-title {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .assignment-meta {
+        color: #cccccc;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .assignment-score {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .score-attempted {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        color: #000;
+    }
+    
+    .score-not-attempted {
+        background: linear-gradient(45deg, #ff4757, #ff3838);
+        color: #000;
+    }
+    
+    .take-assignment-btn {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #000;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+    
+    .take-assignment-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.5);
+        color: #000;
+        text-decoration: none;
+    }
+    
+    .back-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #ffffff;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+    
+    .back-btn:hover {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+        color: #00d4ff;
+        text-decoration: none;
+    }
+    
+    .no-assignments {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+</style>
+
+<div class="subject-details-container">
+    <div class="container">
+        <!-- Back Button -->
+        <a href="{{ url_for('main.user_dashboard', id=user.id, name=user.full_name) }}" class="back-btn">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+        
+        <!-- Subject Header -->
+        <div class="subject-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="subject-title">{{ subject.name }}</h1>
+                    <p class="subject-description">{{ subject.description or 'No description available' }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('main.course_discussion', user_id=user.id, subject_id=subject.id) }}" 
+                       class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-comments me-2"></i>Discussion Forum
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chapters and Assignments -->
+        {% if subject.chapters %}
+            {% for chapter in subject.chapters %}
+                <div class="chapter-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="chapter-title mb-0">
+                            <i class="fas fa-book me-2"></i>{{ chapter.name }}
+                        </h3>
+                        <a href="{{ url_for('main.user_chapter_materials', user_id=user.id, chapter_id=chapter.id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-folder-open me-1"></i>View Materials
+                        </a>
+                    </div>
+                    
+                    {% if chapter.quizzes %}
+                        {% for quiz in chapter.quizzes %}
+                            <div class="assignment-card">
+                                <h5 class="assignment-title">
+                                    <i class="fas fa-question-circle me-2"></i>{{ quiz.name }}
+                                </h5>
+                                <div class="assignment-meta">
+                                    <i class="fas fa-calendar me-1"></i>{{ quiz.date_of_quiz }} | 
+                                    <i class="fas fa-clock me-1"></i>{{ quiz.time_duration }}
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if quiz.user_score is not none %}
+                                            <span class="assignment-score score-attempted">
+                                                <i class="fas fa-check-circle me-1"></i>Score: {{ quiz.user_score }}/{{ quiz.total_questions }} ({{ "%.0f"|format(quiz.user_percentage) }}%)
+                                            </span>
+                                        {% else %}
+                                            <span class="assignment-score score-not-attempted">
+                                                <i class="fas fa-times-circle me-1"></i>Not Attempted
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div>
+                                        <a href="{{ url_for('main.attempt_quiz', quiz_id=quiz.id, user_id=user.id) }}" class="take-assignment-btn">
+                                            {% if quiz.user_score is not none %}
+                                                <i class="fas fa-redo me-1"></i>Retake Assignment
+                                            {% else %}
+                                                <i class="fas fa-play me-1"></i>Start Assignment
+                                            {% endif %}
+                                        </a>
+                                        {% if quiz.user_score is not none %}
+                                            <a href="{{ url_for('main.quiz_results', quiz_id=quiz.id, user_id=user.id, score=quiz.user_score, total=quiz.total_questions) }}" class="take-assignment-btn" style="background: #6c757d; margin-left: 0.5rem;">
+                                                <i class="fas fa-eye me-1"></i>View Results
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-assignments">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <p>No assignments available in this chapter.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="chapter-section">
+                <div class="no-assignments">
+                    <i class="fas fa-folder-open fa-3x mb-3"></i>
+                    <h4>No Chapters Available</h4>
+                    <p>This subject doesn't have any chapters yet.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

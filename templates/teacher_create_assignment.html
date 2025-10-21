@@ -1,0 +1,161 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}Create Assignment - EduFlow{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="main-title">
+                    <i class="fas fa-plus me-2"></i>Create New Assignment
+                </h1>
+                <a href="{{ url_for('notifications.teacher_assignments', teacher_id=teacher.id) }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Assignments
+                </a>
+            </div>
+            
+            <div class="glass-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Assignment Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Assignment Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="assignment_type" class="form-label">Assignment Type *</label>
+                                <select class="form-control" id="assignment_type" name="assignment_type" required>
+                                    <option value="homework">Homework</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="project">Project</option>
+                                    <option value="exam">Exam</option>
+                                    <option value="lab">Lab Work</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Brief description of the assignment..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="subject_id" class="form-label">Subject *</label>
+                                <select class="form-control" id="subject_id" name="subject_id" required>
+                                    <option value="">Select a subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="chapter_id" class="form-label">Chapter (Optional)</label>
+                                <select class="form-control" id="chapter_id" name="chapter_id">
+                                    <option value="">Select a chapter</option>
+                                    <!-- Chapters will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deadline" class="form-label">Deadline *</label>
+                                <input type="datetime-local" class="form-control" id="deadline" name="deadline" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="max_points" class="form-label">Maximum Points</label>
+                                <input type="number" class="form-control" id="max_points" name="max_points" 
+                                       value="100" min="1" max="1000">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="instructions" class="form-label">Instructions</label>
+                            <textarea class="form-control" id="instructions" name="instructions" rows="5" 
+                                      placeholder="Detailed instructions for students..."></textarea>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="send_notifications" name="send_notifications" checked>
+                            <label class="form-check-label" for="send_notifications">
+                                Send notifications to enrolled students
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('notifications.teacher_assignments', teacher_id=teacher.id) }}" 
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-gradient">
+                                <i class="fas fa-save me-2"></i>Create Assignment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set minimum datetime to current time
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('deadline').min = minDateTime;
+    
+    // Load chapters when subject changes
+    document.getElementById('subject_id').addEventListener('change', function() {
+        const subjectId = this.value;
+        const chapterSelect = document.getElementById('chapter_id');
+        
+        // Clear existing options
+        chapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+        
+        if (subjectId) {
+            // Fetch chapters for the selected subject
+            fetch(`/api/subjects/${subjectId}/chapters`)
+                .then(response => response.json())
+                .then(chapters => {
+                    chapters.forEach(chapter => {
+                        const option = document.createElement('option');
+                        option.value = chapter.id;
+                        option.textContent = chapter.name;
+                        chapterSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching chapters:', error);
+                });
+        }
+    });
+    
+    // Auto-resize textareas
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}

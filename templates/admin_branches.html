@@ -1,0 +1,1248 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}Branch & Subject Management{% endblock %}
+
+{% block content %}
+<style>
+    /* Modern Futuristic Theme for Branch Management */
+    .branches-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .branches-header h2 {
+        color: #000;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .branches-header p {
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .back-to-dashboard-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #000;
+        font-weight: 600;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .back-to-dashboard-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .branches-container {
+        background: transparent;
+    }
+    
+    .branch-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .branch-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .branch-section:hover::before {
+        left: 100%;
+    }
+    
+    .branch-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .branch-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        padding: 1.5rem;
+        margin: -1rem -1rem 1rem -1rem;
+    }
+    
+    .branch-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .branch-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        color: #000;
+    }
+    
+    .branch-name {
+        color: #000;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        font-size: 1.5rem;
+    }
+    
+    .branch-short {
+        color: #333;
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+    
+    .branch-description {
+        color: #333;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .branch-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .branch-action-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #000;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .branch-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .subjects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .subject-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .subject-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .subject-title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .subject-description {
+        color: #cccccc;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .subject-stats {
+        color: #cccccc;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .subject-badge {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        color: #000;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .subject-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .subject-action-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .subject-action-btn:hover {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+        color: #00d4ff;
+        transform: translateY(-1px);
+    }
+    
+    .add-subject-btn {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .add-subject-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+    }
+    
+    .no-branches-message {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        color: #ffffff;
+    }
+    
+    .no-branches-message h3 {
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+    
+    .no-branches-message p {
+        color: #cccccc;
+        margin-bottom: 2rem;
+    }
+    
+    /* Subject Cards Modern Futuristic Theme */
+    .subjects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .subject-card {
+        background: rgba(10, 10, 10, 0.8) !important;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .subject-card:hover::before {
+        left: 100%;
+    }
+    
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .subject-content {
+        color: #ffffff;
+    }
+    
+    .subject-name {
+        color: #ffffff !important;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+    
+    .subject-description {
+        color: #cccccc !important;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .subject-stats {
+        color: #00d4ff !important;
+        font-size: 0.85rem;
+    }
+    
+    .subject-stats .text-muted {
+        color: #00d4ff !important;
+    }
+    
+    .subject-badges .badge {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff) !important;
+        color: #000 !important;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .subject-actions .btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .subject-actions .btn:hover {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+        color: #00d4ff;
+        transform: translateY(-2px);
+    }
+    
+    .subject-actions .btn-outline-danger:hover {
+        background: rgba(255, 71, 87, 0.2);
+        border-color: #ff4757;
+        color: #ff4757;
+    }
+    
+    .no-subjects {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        color: #ffffff;
+    }
+    
+    .no-subjects i {
+        color: #00d4ff;
+    }
+    
+    .no-subjects .text-muted {
+        color: #cccccc !important;
+    }
+    
+    .no-subjects .btn {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+    
+    .no-subjects .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+    }
+    
+    /* Modal Modern Futuristic Theme */
+    .modal-content {
+        background: rgba(10, 10, 10, 0.95) !important;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        color: #ffffff;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 20px 20px 0 0;
+        color: #000;
+    }
+    
+    .modal-title {
+        color: #000 !important;
+        font-weight: 700;
+    }
+    
+    .btn-close {
+        filter: invert(1);
+    }
+    
+    .modal-body {
+        background: rgba(10, 10, 10, 0.8);
+        color: #ffffff;
+    }
+    
+    .modal-body .form-label {
+        color: #00d4ff !important;
+        font-weight: 600;
+    }
+    
+    .modal-body .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border-radius: 10px;
+    }
+    
+    .modal-body .form-control:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #00d4ff;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        color: #ffffff;
+    }
+    
+    .modal-body .form-control::placeholder {
+        color: #cccccc;
+    }
+    
+    .modal-body .form-check-label {
+        color: #ffffff !important;
+    }
+    
+    .modal-footer {
+        background: rgba(10, 10, 10, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .modal-footer .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-footer .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+    }
+    
+    .modal-footer .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+    }
+    
+    .modal-footer .btn-primary {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+    }
+    
+    .modal-footer .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+    }
+    
+    .modal-footer .btn-success {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+    }
+    
+    .modal-footer .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="branches-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="{{ url_for('main.admin_dashboard', name=name) }}" 
+                               class="btn btn-outline-light btn-lg me-3 back-to-dashboard-btn">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-sitemap me-2"></i>Branch & Subject Management
+                        </h2>
+                        <p class="text-muted mb-0">Manage engineering branches and their subjects</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addBranchModal">
+                            <i class="fas fa-plus me-1"></i>Add Branch
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branches with Subjects -->
+            <div class="branches-container">
+                {% if branches %}
+                    {% for branch in branches %}
+                    <div class="branch-section mb-4">
+                        <!-- Branch Header -->
+                        <div class="branch-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="branch-info">
+                                    <div class="branch-icon" style="color: {{ branch.color or '#667eea' }}">
+                                        {% if branch.icon %}
+                                            <i class="{{ branch.icon }}"></i>
+                                        {% else %}
+                                            <i class="fas fa-cogs"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="branch-details">
+                                        <h4 class="branch-name">{{ branch.name }}</h4>
+                                        <p class="branch-short">{{ branch.short_name }}</p>
+                                        {% if branch.description %}
+                                            <p class="branch-description">{{ branch.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="branch-actions">
+                                    <a href="{{ url_for('main.admin_branch_dashboard', branch_id=branch.id) }}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-tachometer-alt me-1"></i>Branch Dashboard
+                                    </a>
+                                    <button class="btn btn-success btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#addSubjectModal{{ branch.id }}">
+                                        <i class="fas fa-plus me-1"></i>Add Subject
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editBranchModal{{ branch.id }}">
+                                        <i class="fas fa-edit me-1"></i>Edit Branch
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" 
+                                            onclick="deleteBranch({{ branch.id }})">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subjects for this Branch -->
+                        <div class="subjects-container">
+                            <div class="subjects-header">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-book me-1"></i>Subjects ({{ branch.subjects|length }})
+                                </h6>
+                            </div>
+                            
+                            {% if branch.subjects %}
+                                <div class="subjects-grid">
+                                    {% for subject in branch.subjects %}
+                                    <div class="subject-card">
+                                        <div class="subject-content">
+                                            <div class="subject-header">
+                                                <h6 class="subject-name">{{ subject.name }}</h6>
+                                                <div class="subject-badges">
+                                                    {% if subject.is_core %}
+                                                        <span class="badge bg-primary">Core</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Elective</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% if subject.description %}
+                                                <p class="subject-description">{{ subject.description }}</p>
+                                            {% endif %}
+                                            <div class="subject-stats">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users me-1"></i>
+                                                    {{ subject.chapters|length }} chapters
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="subject-actions">
+                                            <button class="btn btn-outline-primary btn-sm" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editSubjectModal{{ subject.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" 
+                                                    onclick="deleteSubject({{ subject.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="no-subjects">
+                                    <i class="fas fa-book fa-2x mb-2"></i>
+                                    <p class="text-muted">No subjects added yet</p>
+                                    <button class="btn btn-primary btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#addSubjectModal{{ branch.id }}">
+                                        <i class="fas fa-plus me-1"></i>Add First Subject
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-branches">
+                        <i class="fas fa-sitemap fa-3x mb-3"></i>
+                        <h4>No Branches Yet</h4>
+                        <p>Add engineering branches to organize courses by specialization.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Back Button -->
+<div class="floating-back-btn">
+    <a href="{{ url_for('main.admin_dashboard', name=name) }}" 
+       class="btn btn-primary btn-lg floating-back-button" 
+       title="Back to Dashboard">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
+<!-- Add Branch Modal -->
+<div class="modal fade" id="addBranchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Branch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('main.admin_add_branch') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Name *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="e.g., Computer Science Engineering">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Short Name *</label>
+                        <input type="text" class="form-control" name="short_name" required 
+                               placeholder="e.g., CSE">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Brief description of this branch"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Icon Class</label>
+                                <input type="text" class="form-control" name="icon" 
+                                       placeholder="e.g., fas fa-laptop-code">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Color</label>
+                                <input type="color" class="form-control" name="color" value="#667eea">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Branch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Subject Modals for each Branch -->
+{% for branch in branches %}
+<div class="modal fade" id="addSubjectModal{{ branch.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Subject to {{ branch.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('main.admin_add_subject_to_branch', branch_id=branch.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Subject Name *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="e.g., Data Structures and Algorithms">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Brief description of this subject"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_core" id="is_core_{{ branch.id }}" checked>
+                            <label class="form-check-label" for="is_core_{{ branch.id }}">
+                                Core Subject
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Subject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Edit Branch Modals -->
+{% for branch in branches %}
+<div class="modal fade" id="editBranchModal{{ branch.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Branch: {{ branch.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('main.admin_edit_branch', branch_id=branch.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Name *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               value="{{ branch.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Short Name *</label>
+                        <input type="text" class="form-control" name="short_name" required 
+                               value="{{ branch.short_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3">{{ branch.description or '' }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Icon Class</label>
+                                <input type="text" class="form-control" name="icon" 
+                                       value="{{ branch.icon or '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Color</label>
+                                <input type="color" class="form-control" name="color" 
+                                       value="{{ branch.color or '#667eea' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Branch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Edit Subject Modals -->
+{% for branch in branches %}
+    {% for subject in branch.subjects %}
+    <div class="modal fade" id="editSubjectModal{{ subject.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Subject: {{ subject.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('main.admin_edit_subject', subject_id=subject.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name *</label>
+                            <input type="text" class="form-control" name="name" required 
+                                   value="{{ subject.name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3">{{ subject.description or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Branch</label>
+                            <select class="form-control" name="branch_id">
+                                {% for b in branches %}
+                                <option value="{{ b.id }}" {% if b.id == subject.branch_id %}selected{% endif %}>
+                                    {{ b.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_core" id="edit_is_core_{{ subject.id }}" 
+                                       {% if subject.is_core %}checked{% endif %}>
+                                <label class="form-check-label" for="edit_is_core_{{ subject.id }}">
+                                    Core Subject
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+
+<style>
+.branches-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Back to Dashboard Button Styling */
+.back-to-dashboard-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.back-to-dashboard-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.back-to-dashboard-btn:hover::before {
+    left: 100%;
+}
+
+.back-to-dashboard-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.back-to-dashboard-btn:active {
+    transform: translateY(0);
+}
+
+.back-to-dashboard-btn i {
+    transition: transform 0.3s ease;
+}
+
+.back-to-dashboard-btn:hover i {
+    transform: translateX(-3px);
+}
+
+/* Floating Back Button */
+.floating-back-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.floating-back-btn.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.floating-back-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.floating-back-button:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.floating-back-button:active {
+    transform: translateY(-1px) scale(1.05);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 0 0 0 10px rgba(102, 126, 234, 0.1);
+    }
+    100% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+}
+
+/* Responsive adjustments for floating button */
+@media (max-width: 768px) {
+    .floating-back-btn {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .floating-back-button {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+.branches-container {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.branch-section {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    margin-bottom: 2rem;
+}
+
+.branch-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.branch-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.branch-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.branch-details {
+    flex: 1;
+}
+
+.branch-name {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1.3rem;
+}
+
+.branch-short {
+    color: #6c757d;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.branch-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+.branch-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.subjects-container {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.subjects-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.subject-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: all 0.2s ease;
+}
+
+.subject-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.subject-content {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.subject-name {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+
+.subject-badges {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.subject-description {
+    color: #6c757d;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.subject-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.subject-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.no-subjects {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.no-subjects i {
+    opacity: 0.5;
+}
+
+.no-branches {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.no-branches i {
+    opacity: 0.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .branch-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .branch-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 1rem;
+    }
+    
+    .subjects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .subject-card {
+        flex-direction: column;
+    }
+    
+    .subject-actions {
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+}
+</style>
+
+<script>
+// Delete functions
+function deleteSubject(subjectId) {
+    if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/subjects/${subjectId}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function deleteBranch(branchId) {
+    if (confirm('Are you sure you want to delete this branch? This will also delete all subjects in this branch. This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/branches/${branchId}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Floating back button functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const floatingBtn = document.querySelector('.floating-back-btn');
+    
+    // Show/hide floating button based on scroll position
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 300) {
+            floatingBtn.classList.add('show');
+        } else {
+            floatingBtn.classList.remove('show');
+        }
+    });
+    
+    // Smooth scroll to top when floating button is clicked
+    const floatingBackButton = document.querySelector('.floating-back-button');
+    floatingBackButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+        
+        // Add a small delay before navigation to show the scroll effect
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 300);
+    });
+    
+    // Add click animation to floating button
+    floatingBackButton.addEventListener('click', function() {
+        this.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 150);
+    });
+});
+
+// Smooth scroll for all back buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const backButtons = document.querySelectorAll('.back-to-dashboard-btn');
+    
+    backButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+            
+            // Navigate after animation
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 200);
+        });
+    });
+});
+</script>
+{% endblock %}

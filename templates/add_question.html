@@ -1,0 +1,43 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+    <div class="container">
+        <div class="center"><h3>Add Question</h3></div>
+        <form action="/add_question/{{quiz_id}}/{{name}}" method="POST">
+            <div class="input_form">
+                <div class="mb-3">
+                    <label for="question_statement" class="form-label">Question Statement</label>
+                    <input type="text" class="form-control" name="question_statement" id="question_statement" required>
+                </div>
+                <div class="mb-3">
+                    <label for="option1" class="form-label">Option 1</label>
+                    <input type="text" class="form-control" name="option1" id="option1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="option2" class="form-label">Option 2</label>
+                    <input type="text" class="form-control" name="option2" id="option2" required>
+                </div>
+                <div class="mb-3">
+                    <label for="option3" class="form-label">Option 3</label>
+                    <input type="text" class="form-control" name="option3" id="option3" required>
+                </div>
+                <div class="mb-3">
+                    <label for="option4" class="form-label">Option 4</label>
+                    <input type="text" class="form-control" name="option4" id="option4" required>
+                </div>
+                <div class="mb-3">
+                    <label for="correct_option" class="form-label">Correct Option</label>
+                    <select class="form-control" name="correct_option" id="correct_option" required>
+                        <option value="option1">Option 1</option>
+                        <option value="option2">Option 2</option>
+                        <option value="option3">Option 3</option>
+                        <option value="option4">Option 4</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="/admin/{{name}}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}{% block page_title %}Admin Dashboard{% endblock %} - EduFlow{% endblock %}
+
+{% block content %}
+<style>
+    /* Enhanced Navigation Bar Styling */
+    .glass-navbar {
+        /* Brighter, more vibrant glass effect */
+        background: linear-gradient(90deg, rgba(0,212,255,0.16), rgba(168,85,247,0.14), rgba(255,0,255,0.12)) !important;
+        backdrop-filter: blur(24px) saturate(140%);
+        -webkit-backdrop-filter: blur(24px) saturate(140%);
+        border-bottom: 1px solid rgba(0, 212, 255, 0.35);
+        box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255,255,255,0.05);
+        position: relative;
+    }
+
+    /* Neon gradient underline for navbar */
+    .glass-navbar::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: linear-gradient(90deg, #00d4ff, #7c3aed, #ff00ff, #00d4ff);
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.6), 0 0 28px rgba(0, 212, 255, 0.35);
+        opacity: 0.95;
+    }
+    
+    .navbar-brand {
+        /* Apply the same vibrant pill style as other top items */
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff);
+        color: #000 !important;
+        font-weight: 900;
+        border-radius: 999px;
+        padding: 10px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 10px 24px rgba(0, 212, 255, 0.35);
+        text-shadow: none;
+        transition: all 0.3s ease;
+    }
+    
+    .navbar-brand:hover {
+        filter: brightness(1.06) saturate(1.1);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(139, 92, 246, 0.45);
+        color: #000 !important;
+    }
+    
+    .nav-link {
+        /* Apply the same vibrant pill style as Dashboard to all top items */
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff) !important;
+        color: #000 !important;
+        font-weight: 800;
+        transition: all 0.25s ease;
+        border-radius: 999px;
+        margin: 0 4px;
+        padding: 10px 14px !important;
+        text-shadow: none;
+        box-shadow: 0 8px 22px rgba(0, 212, 255, 0.35);
+        border: none;
+    }
+    
+    .nav-link:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05) saturate(1.1);
+        box-shadow: 0 12px 28px rgba(139, 92, 246, 0.45);
+    }
+    
+    .nav-link.active {
+        filter: brightness(1.1) saturate(1.15);
+        box-shadow: 0 14px 30px rgba(139, 92, 246, 0.5);
+    }
+    
+    .dropdown-menu {
+        background: rgba(16, 18, 24, 0.96) !important;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        border-radius: 15px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    }
+    
+    .dropdown-item {
+        color: #f2fbff !important; /* brighter text */
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        margin: 2px 4px;
+        background: rgba(255,255,255,0.02);
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(0, 212, 255, 0.1) !important;
+        color: #00d4ff !important;
+    }
+    
+    .dropdown-item.active {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff) !important;
+        color: #000 !important;
+    }
+    
+    .navbar-toggler {
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 8px;
+    }
+    
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    
+    .search-form {
+        background: rgba(0, 0, 0, 0.45); /* dark by default */
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 25px;
+        backdrop-filter: blur(12px);
+        color: #ffffff; /* brighter input text */
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    /* clearer placeholder text */
+    .search-form::placeholder {
+        color: #dff7ff;
+        opacity: 0.95;
+    }
+    
+    .search-form:focus {
+        border-color: #00e5ff;
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.45);
+        background: rgba(0, 0, 0, 0.55);
+    }
+    
+    .search-btn {
+        /* Match dashboard pill style for the search button */
+        background: linear-gradient(45deg, #00e5ff, #8b5cf6, #ff00ff);
+        border: none;
+        border-radius: 999px;
+        color: #000;
+        font-weight: 800;
+        transition: all 0.25s ease;
+        box-shadow: 0 8px 22px rgba(0, 212, 255, 0.35);
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(0, 212, 255, 0.35);
+        background: linear-gradient(45deg, rgba(0,0,0,0.75), rgba(16,18,24,0.85));
+    }
+    
+    .user-dropdown {
+        background: rgba(0, 0, 0, 0.45); /* dark by default */
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        color: #ffffff;
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+    
+    .user-dropdown:hover {
+        background: rgba(0, 212, 255, 0.12);
+        border-color: #00e5ff;
+        box-shadow: 0 8px 22px rgba(0, 212, 255, 0.25);
+    }
+</style>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg glass-navbar fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% if current_user.is_authenticated and current_user.role == 2 %}{{ url_for('main.teacher_dashboard', id=current_user.id, name=current_user.full_name) }}{% else %}{{ url_for('main.admin_dashboard', name=name) }}{% endif %}" style="color: #00d4ff;">
+            <i class="fas fa-cogs me-2"></i>{% if current_user.is_authenticated and current_user.role == 2 %}EduFlow Teacher{% else %}EduFlow Admin{% endif %}
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link {% if (current_user.is_authenticated and current_user.role == 2 and request.endpoint == 'main.teacher_dashboard') or (not current_user.is_authenticated or current_user.role == 0 and request.endpoint == 'main.admin_dashboard') %}active fw-bold{% endif %}" 
+                       href="{% if current_user.is_authenticated and current_user.role == 2 %}{{ url_for('main.teacher_dashboard', id=current_user.id, name=current_user.full_name) }}{% else %}{{ url_for('main.admin_dashboard', name=name) }}{% endif %}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                
+                {% if not current_user.is_authenticated or current_user.role == 0 %}
+                <!-- Management Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.admin_user_management', 'main.admin_teacher_management'] %}active fw-bold{% endif %}" 
+                       href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cogs me-1"></i>Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item {% if request.endpoint == 'main.admin_user_management' %}active{% endif %}" 
+                               href="{{ url_for('main.admin_user_management', name=name) }}">
+                            <i class="fas fa-users me-2"></i>User Management
+                        </a></li>
+                        <li><a class="dropdown-item {% if request.endpoint == 'main.admin_teacher_management' %}active{% endif %}"
+                               href="{{ url_for('main.admin_teacher_management') }}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Management
+                        </a></li>
+                    </ul>
+                </li>
+                
+                <!-- Content Management Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.admin_branches', 'main.admin_chapter_management'] %}active fw-bold{% endif %}" 
+                       href="#" id="contentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-book me-1"></i>Content
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item {% if request.endpoint == 'main.admin_branches' %}active{% endif %}"
+                               href="{{ url_for('main.admin_branches') }}">
+                            <i class="fas fa-sitemap me-2"></i>Branch Management
+                        </a></li>
+                        <li><a class="dropdown-item {% if request.endpoint == 'main.admin_chapter_management' %}active{% endif %}"
+                               href="{{ url_for('main.admin_chapter_management') }}">
+                            <i class="fas fa-book-open me-2"></i>Chapter Management
+                        </a></li>
+                    </ul>
+                </li>
+                
+                <!-- Branch Focus Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="branchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-graduation-cap me-1"></i>Branch Focus
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('main.admin_branch_selection', name=name) }}">
+                            <i class="fas fa-exchange-alt me-2"></i>Select Branch Focus
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.admin_branches') }}">
+                            <i class="fas fa-list me-2"></i>All Branches
+                        </a></li>
+                        {% for branch in branches %}
+                        <li><a class="dropdown-item" href="{{ url_for('main.admin_branch_dashboard', branch_id=branch.id) }}">
+                            <i class="{{ branch.icon or 'fas fa-cogs' }} me-2" style="color: {{ branch.color or '#667eea' }}"></i>{{ branch.name }}
+                        </a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+            
+            <!-- Search Form -->
+            <form class="d-flex me-3" method="POST" action="{{ url_for('main.search', name=name) }}">
+                <div class="input-group">
+                    <input class="form-control search-form" type="search" placeholder="Search subjects, chapters, assignments..." 
+                           name="search_text" value="{{ search_text or '' }}" style="border-radius: 25px 0 0 25px; color: #ffffff;">
+                    <button class="btn search-btn" type="submit" style="border-radius: 0 25px 25px 0;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Admin Menu -->
+            <div class="navbar-nav">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center user-dropdown" href="#" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-shield me-2"></i>
+                        <span>{% if current_user.is_authenticated %}{{ current_user.full_name or current_user.email }}{% else %}{{ name }}{% endif %}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if not current_user.is_authenticated or current_user.role == 0 %}
+                            <li><a class="dropdown-item" href="{{ url_for('main.admin_user_management', name=name) }}">
+                                <i class="fas fa-users me-2"></i>Manage Users
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid" style="padding-top: 80px; min-height: 100vh;">
+    {% block admin_content %}{% endblock %}
+</div>
+
+<style>
+    /* Navigation Bar Styling */
+    .navbar-nav .nav-link {
+        color: #2c3e50 !important;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-radius: 25px;
+        margin: 0 0.1rem;
+        padding: 0.75rem 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .navbar-nav .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .navbar-nav .nav-link:hover::before {
+        left: 100%;
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .navbar-nav .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Dropdown Styling */
+    .dropdown-menu {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.95);
+        margin-top: 0.5rem;
+        min-width: 220px;
+        padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+        border-radius: 15px;
+        margin: 0.2rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dropdown-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .dropdown-item:hover::before {
+        left: 100%;
+    }
+    
+    .dropdown-item:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateX(8px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .dropdown-item.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+    }
+    
+    /* Brand Styling */
+    .navbar-brand {
+        color: #2c3e50 !important;
+        font-size: 1.6rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    
+    .navbar-brand:hover {
+        color: #667eea !important;
+        transform: scale(1.05);
+    }
+    
+    /* Search Form Styling */
+    .input-group .form-control {
+        border-radius: 25px 0 0 25px;
+        border-right: none;
+        font-size: 0.9rem;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    .input-group .btn {
+        border-radius: 0 25px 25px 0;
+        border-left: none;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .input-group .btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        transform: scale(1.05);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .navbar-nav .nav-link {
+            margin: 0.1rem 0;
+            padding: 0.6rem 1rem;
+        }
+        
+        .dropdown-menu {
+            margin-top: 0.25rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .navbar-brand {
+            font-size: 1.4rem;
+        }
+        
+        .navbar-nav .nav-link {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+        }
+        
+        .input-group .form-control {
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Animation for dropdown arrows */
+    .dropdown-toggle::after {
+        transition: transform 0.3s ease;
+    }
+    
+    .dropdown-toggle[aria-expanded="true"]::after {
+        transform: rotate(180deg);
+    }
+</style>
+{% endblock %}

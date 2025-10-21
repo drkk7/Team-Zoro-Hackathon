@@ -1,0 +1,315 @@
+{% extends "user_layout.html" %}
+
+{% block title %}Chapter Materials - {{ chapter.name }}{% endblock %}
+
+{% block user_content %}
+<style>
+    /* Modern Futuristic Theme for Materials Layout */
+    .materials-header {
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .materials-header h2 {
+        color: #000;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .materials-header p {
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .back-to-course-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #000;
+        font-weight: 600;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .back-to-course-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .chapter-description-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chapter-description-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .chapter-description-card:hover::before {
+        left: 100%;
+    }
+    
+    .chapter-description-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .chapter-description-card h4 {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .chapter-description-card p {
+        color: #cccccc;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+    
+    .materials-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 2rem;
+        min-height: 300px;
+    }
+    
+    .material-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .material-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .material-card:hover::before {
+        left: 100%;
+    }
+    
+    .material-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+        border-color: #00d4ff;
+    }
+    
+    .material-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .material-title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .material-description {
+        color: #cccccc;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+    
+    .material-meta {
+        color: #cccccc;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .download-btn {
+        background: linear-gradient(45deg, #00d4ff, #ff00ff);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        color: #000;
+        text-decoration: none;
+    }
+    
+    .no-materials {
+        text-align: center;
+        padding: 3rem;
+        color: #ffffff;
+    }
+    
+    .no-materials h3 {
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+    
+    .no-materials p {
+        color: #cccccc;
+        margin-bottom: 2rem;
+    }
+    
+    .no-materials-icon {
+        font-size: 4rem;
+        color: #cccccc;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="materials-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-folder-open me-2"></i>Chapter Materials
+                        </h2>
+                        <p class="text-muted mb-0">{{ chapter.name }} - {{ chapter.subject.name }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.user_subject_details', user_id=user.id, subject_id=chapter.subject.id) }}" 
+                           class="btn back-to-course-btn">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter Description -->
+            <div class="chapter-description-card">
+                <h4><i class="fas fa-info-circle me-2"></i>Chapter Description</h4>
+                <p>{{ chapter.description or 'No description available for this chapter.' }}</p>
+            </div>
+
+            <!-- Materials Grid -->
+            <div class="materials-container">
+                {% if materials %}
+                    <div class="row">
+                        {% for material in materials %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="material-card">
+                                <div class="material-icon">
+                                    {% if material.material_type == 'file' %}
+                                        {% if material.file_type == 'pdf' %}
+                                            <i class="fas fa-file-pdf"></i>
+                                        {% elif material.file_type in ['doc', 'docx'] %}
+                                            <i class="fas fa-file-word"></i>
+                                        {% elif material.file_type in ['ppt', 'pptx'] %}
+                                            <i class="fas fa-file-powerpoint"></i>
+                                        {% elif material.file_type in ['xls', 'xlsx'] %}
+                                            <i class="fas fa-file-excel"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    {% elif material.material_type == 'link' %}
+                                        <i class="fas fa-link"></i>
+                                    {% else %}
+                                        <i class="fas fa-file-text"></i>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="material-content">
+                                    <h5 class="material-title">{{ material.title }}</h5>
+                                    {% if material.description %}
+                                        <p class="material-description">{{ material.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="material-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ material.created_at.strftime('%B %d, %Y') }}
+                                        </small>
+                                        {% if material.file_size %}
+                                            <small class="text-muted ms-2">
+                                                <i class="fas fa-weight me-1"></i>
+                                                {{ "%.1f"|format(material.file_size / 1024) }} KB
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="material-actions">
+                                    {% if material.material_type == 'file' and material.file_path %}
+                                        <a href="{{ url_for('main.uploaded_file', filename=material.file_path.split('/')[-1]) }}" 
+                                           class="btn btn-primary btn-sm" target="_blank">
+                                            <i class="fas fa-download me-1"></i>Download
+                                        </a>
+                                    {% elif material.material_type == 'link' and material.external_url %}
+                                        <a href="{{ material.external_url }}" 
+                                           class="btn btn-primary btn-sm" target="_blank">
+                                            <i class="fas fa-external-link-alt me-1"></i>Open Link
+                                        </a>
+                                    {% elif material.material_type == 'text' %}
+                                        <span class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>Text Material
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-materials">
+                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                        <h4>No Materials Available</h4>
+                        <p>Your teacher hasn't added any materials for this chapter yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
